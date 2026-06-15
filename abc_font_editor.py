@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
     QTextEdit, QTableWidget, QTableWidgetItem, QHeaderView,
     QCheckBox, QAbstractItemView,
 )
-from PyQt5.QtGui import QPixmap, QImage, QPainter, QColor, QPen, QFont, QIcon, QFontMetrics, QBrush, QTransform, QPainterPath
+from PyQt5.QtGui import QPixmap, QImage, QPainter, QColor, QPen, QFont, QIcon, QFontMetrics, QBrush, QTransform, QPainterPath, QPalette
 from PyQt5.QtCore import Qt, QRectF, QPointF
 from PIL import Image
 import sys
@@ -1387,8 +1387,6 @@ class ABCFontEditor(QWidget):
         sep.setStyleSheet("color: #666; font-size: 10px;")
         layout.addWidget(sep)
 
-        from PyQt5.QtGui import QPalette
-
         def make_dark_input(placeholder):
             w = QLineEdit()
             w.setPlaceholderText(placeholder)
@@ -1903,7 +1901,7 @@ class ABCFontEditor(QWidget):
                     self._add_outlined_index_label(index_text, font, x0 + 1, y0 + 1)
 
     def toggle_smooth_texture(self, checked):
-        if not hasattr(self, "pix_item"):
+        if not hasattr(self, "pix_item") or self.pix_item is None:
             return
 
         mode = (
@@ -1956,7 +1954,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyleSheet("QToolTip { background-color: #333333; color: white; border: 1px solid #555555; }")
     try:
-        from PyQt5.QtGui import QPixmap
         pixmap = QPixmap()
         pixmap.loadFromData(base64.b64decode(ICON_B64))
         icon = QIcon(pixmap)
