@@ -53,7 +53,7 @@
 
 ## Installation
 ```bash
-pip install PyQt5 Pillow
+pip install PyQt6 Pillow
 ```
 ## Usage
 
@@ -62,7 +62,7 @@ pip install PyQt5 Pillow
 > ⚠️ On Linux you may need to use `python3` instead of `python`.
 
 ```bash
-python abc_font_editor.py
+python -m abc_font_editor
 ```
 
 ## Usage Examples
