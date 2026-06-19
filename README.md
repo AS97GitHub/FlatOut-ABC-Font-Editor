@@ -19,7 +19,7 @@
 
 ## Features
 - Load and visualize `.abc` font files alongside their texture atlases (`.png` and supported `.dds` formats), with glyph rectangles drawn directly over the texture
-- Double-click any glyph on the texture preview to edit its coordinates and metrics
+- Click any glyph on the texture preview to edit its coordinates and metrics
 - Export glyph tables to JSON with:
   - UV or pixel coordinates
   - Character mappings
@@ -74,7 +74,7 @@ python -m abc_font_editor
 
 2. Editing glyphs directly
     1. Load a texture and `.abc` file
-    2. Double-click any glyph rectangle on the preview
+    2. Click any glyph rectangle on the preview
     3. Edit:
        - Pixel coordinates
        - UV coordinates
