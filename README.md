@@ -3,7 +3,7 @@
 <td width="170">
 
 <p>
-  <img src="src/abc_font_editor/resources/icon.ico">
+  <img src="abc_font_editor/resources/icon.ico">
 </p>
 
 </td>
