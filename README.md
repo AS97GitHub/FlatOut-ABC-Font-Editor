@@ -48,7 +48,7 @@
 
 ## Requirements
 - Python 3.x
-- PyQt5
+- PyQt6
 - Pillow
 
 ## Installation
