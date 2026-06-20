@@ -177,7 +177,7 @@ python run.py
 ## Project Structure
 
 ```
-ABC_Font_Editor/
+project/
     ├── run.py
     └── abc_font_editor/
         ├── __init__.py
