@@ -65,6 +65,12 @@ pip install PyQt6 Pillow
 python -m abc_font_editor
 ```
 
+or
+
+```bash
+python run.py
+```
+
 ## Usage Examples
 1. Viewing a font file
     1. Click **Load Texture** and open the font texture (example: `hud_numbers.dds`)
