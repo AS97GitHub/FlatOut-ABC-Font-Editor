@@ -173,3 +173,45 @@ python run.py
 ## Notes
 - Changes are stored in memory until explicitly saved
 - `.dds` loading depends on Pillow DDS support
+
+## Project Structure
+
+```
+ABC_Font_Editor/
+    ├── run.py
+    └── abc_font_editor/
+        ├── __init__.py
+        ├── __main__.py
+        ├── dialogs.py
+        ├── main.py
+        ├── main_window.py
+        ├── abc/
+        │   ├── __init__.py
+        │   ├── editing.py
+        │   ├── glyph.py
+        │   ├── parser.py
+        │   └── writer.py
+        ├── graphics/
+        │   ├── __init__.py
+        │   ├── glyph_item.py
+        │   ├── renderer.py
+        │   └── view.py
+        ├── io/
+        │   ├── __init__.py
+        │   └── json_io.py
+        ├── resources/
+        │   └── icon.ico
+        ├── texture/
+        │   ├── __init__.py
+        │   ├── image_utils.py
+        │   └── loader.py
+        └── utils/
+            ├── __init__.py
+            └── icons.py
+```
+
+## License
+MIT License. See [LICENSE](LICENSE).
+
+## Credits
+- Developed by AS97.
