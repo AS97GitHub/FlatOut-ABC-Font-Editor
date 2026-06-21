@@ -43,7 +43,7 @@
 - All modifications are applied in memory until **Save .abc** is used
 
 <p align="center">
-  <img src="Screenshot.png" width="768">
+  <img src="images/Screenshot.png" width="768">
 </p>
 
 ## Requirements
