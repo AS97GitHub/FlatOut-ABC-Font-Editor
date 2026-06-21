@@ -46,6 +46,22 @@
   <img src="images/Screenshot.png" width="768">
 </p>
 
+<p align="center">
+  <img src="images/Screenshot2.png" width="768">
+</p>
+
+<p align="center">
+  <img src="images/Screenshot3.png" width="768">
+</p>
+
+<p align="center">
+  <img src="images/Screenshot4.png" width="768">
+</p>
+
+<p align="center">
+  <img src="images/Screenshot5.png" width="768">
+</p>
+
 ## Requirements
 - Python 3.x
 - PyQt6
