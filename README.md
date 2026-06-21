@@ -42,6 +42,7 @@
 - Glyph index overlay visualization directly on the texture
 - All modifications are applied in memory until **Save .abc** is used
 
+## Screenshots
 <p align="center">
   <img src="images/Screenshot.png" width="768">
 </p>
