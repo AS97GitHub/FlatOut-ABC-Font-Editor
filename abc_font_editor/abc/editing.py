@@ -16,35 +16,54 @@ class EditingMixin:
 
     def add_symbol(self):
         if not self.abc_path or not self.original_data:
-            self.show_warning("Error", "Load an .abc file first.")
+            self.show_error("Error", "Load an .abc file first.")
             return
 
         dlg = self.create_dialog()
         dlg.setWindowTitle("Add Symbol / Glyph Index")
         dlg.setStyleSheet("background-color: #202020; color: white;")
-        dlg.resize(400, 220)
+        dlg.setFixedWidth(470)
+        dlg.setFixedHeight(440)
         layout = QVBoxLayout(dlg)
 
-        LABEL_W = 85  # adjust to move input fields left/right
+        LABEL_W = 68  # adjust to move input fields left/right
+
+        sep = QLabel("── Character mapping ──")
+        sep.setStyleSheet("color: #666; font-size: 10px;")
+        layout.addWidget(sep)
 
         symbol_row = QHBoxLayout()
-        _lbl = QLabel("Symbol 1:"); _lbl.setFixedWidth(LABEL_W); symbol_row.addWidget(_lbl)
+        symbol_lbl = QLabel("Symbol 1:")
+        symbol_lbl.setFixedWidth(LABEL_W)
+        symbol_lbl.setStyleSheet("margin-left: 14px;")
+        symbol_row.addWidget(symbol_lbl)
         symbol_input = QLineEdit()
-        symbol_input.setPlaceholderText("Optional: А or U+0410 or 0xC0")
+        symbol_input.setPlaceholderText("Optional: A or U+0041 or 0x41 or 65")
         symbol_input.setStyleSheet("background-color: #333; color: white;")
         symbol_row.addWidget(symbol_input)
         layout.addLayout(symbol_row)
 
         symbol2_row = QHBoxLayout()
-        _lbl = QLabel("Symbol 2:"); _lbl.setFixedWidth(LABEL_W); symbol2_row.addWidget(_lbl)
+        symbol2_lbl = QLabel("Symbol 2:")
+        symbol2_lbl.setFixedWidth(LABEL_W)
+        symbol2_lbl.setStyleSheet("margin-left: 14px;")
+        symbol2_row.addWidget(symbol2_lbl)
         symbol2_input = QLineEdit()
-        symbol2_input.setPlaceholderText("Optional: second char on same glyph")
+        symbol2_input.setPlaceholderText("Optional: B or U+0042 or 0x42 or 66")
         symbol2_input.setStyleSheet("background-color: #333; color: white;")
         symbol2_row.addWidget(symbol2_input)
         layout.addLayout(symbol2_row)
 
+        COPY_LABEL_W = 95  # adjust to move input fields left/right (For "Copy glyph index:" only)
+
+        sep = QLabel("── Copy from existing glyph ──")
+        sep.setStyleSheet("color: #666; font-size: 10px;")
+        layout.addWidget(sep)
+
         copy_row = QHBoxLayout()
-        _lbl = QLabel("Copy glyph index:"); _lbl.setFixedWidth(LABEL_W); copy_row.addWidget(_lbl)
+        copy_lbl = QLabel("Copy glyph index:")
+        copy_lbl.setFixedWidth(COPY_LABEL_W)
+        copy_row.addWidget(copy_lbl)
         copy_index_input = QSpinBox()
         copy_index_input.setRange(0, max(0, getattr(self, "glyph_record_count", len(self.glyphs)) - 1))
         copy_index_input.setValue(0)
@@ -52,29 +71,37 @@ class EditingMixin:
         copy_row.addWidget(copy_index_input)
         layout.addLayout(copy_row)
 
-        rect_row = QHBoxLayout()
-        _lbl = QLabel("Pixel rect:"); _lbl.setFixedWidth(LABEL_W); rect_row.addWidget(_lbl)
-        rect_input = QLineEdit()
-        rect_input.setPlaceholderText("Optional: x_start y_start x_end y_end")
-        rect_input.setStyleSheet("background-color: #333; color: white;")
-        rect_row.addWidget(rect_input)
-        layout.addLayout(rect_row)
-        rect_hint = QLabel("Start X    Start Y    End X    End Y    ·    space-separated")
-        rect_hint.setStyleSheet("color: #666; font-size: 10px; margin-left: 92px;")
-        layout.addWidget(rect_hint)
+        sep = QLabel("── Glyph coordinates ──")
+        sep.setStyleSheet("color: #666; font-size: 10px;")
+        layout.addWidget(sep)
 
-        metrics_row = QHBoxLayout()
-        _lbl = QLabel("Metrics:"); _lbl.setFixedWidth(LABEL_W); metrics_row.addWidget(_lbl)
-        metrics_input = QLineEdit()
-        metrics_input.setPlaceholderText("Optional: padding_left glyph_width cell_width")
-        metrics_input.setStyleSheet("background-color: #333; color: white;")
-        metrics_row.addWidget(metrics_input)
-        layout.addLayout(metrics_row)
-        add_metrics_hint = QLabel("Padding Left    Glyph Width    Cell Width    ·    space-separated")
-        add_metrics_hint.setStyleSheet("color: #666; font-size: 10px; margin-left: 92px;")
-        layout.addWidget(add_metrics_hint)
+        def make_rect_row(label_text, placeholder, indent=0):
+            row = QHBoxLayout()
+            lbl = QLabel(label_text)
+            lbl.setFixedWidth(LABEL_W)
+            lbl.setIndent(indent)
+            row.addWidget(lbl)
+            inp = QLineEdit()
+            inp.setPlaceholderText(placeholder)
+            inp.setStyleSheet("background-color: #333; color: white;")
+            row.addWidget(inp)
+            layout.addLayout(row)
+            return inp
 
-        hint = QLabel("Leave Symbol empty to add only a new glyph. Both symbols will map to the same glyph.")
+        rect_x0_input = make_rect_row("Start X:", "Optional, e.g. 0", 32)
+        rect_y0_input = make_rect_row("Start Y:", "Optional, e.g. 0", 32)
+        rect_x1_input = make_rect_row("End X:",   "Optional, e.g. 64", 36)
+        rect_y1_input = make_rect_row("End Y:",   "Optional, e.g. 32", 36)
+
+        sep = QLabel("── Glyph metrics ──")
+        sep.setStyleSheet("color: #666; font-size: 10px;")
+        layout.addWidget(sep)
+
+        metrics_pad_input  = make_rect_row("Pad Left:",    "Optional, e.g. 0 (pixels, can be negative)", 23)
+        metrics_gw_input   = make_rect_row("Glyph Width:", "Optional, e.g. 64",  0)
+        metrics_cw_input   = make_rect_row("Cell Width:",  "Optional, e.g. 64",   11)
+
+        hint = QLabel("Tip: leave Symbol fields empty to add a glyph record without any character mapping.")
         hint.setStyleSheet("color: #aaa;")
         layout.addWidget(hint)
 
@@ -119,7 +146,7 @@ class EditingMixin:
         old_record_count = getattr(self, "glyph_record_count", len(self.glyphs))
         source_index = copy_index_input.value()
         if source_index < 0 or source_index >= old_record_count:
-            self.show_warning("Invalid Index", "Copy glyph index is outside the glyph table.")
+            self.show_error("Invalid Index", "Copy glyph index is outside the glyph table.")
             return
 
         old_records_start = getattr(self, "charmap_end", 22) + 2
@@ -134,21 +161,22 @@ class EditingMixin:
         ]
 
         new_record = bytearray(old_records[source_index])
-        rect_values = [v for v in re.split(r"[\s,;]+", rect_input.text().strip()) if v]
-        metrics_values = [v for v in re.split(r"[\s,;]+", metrics_input.text().strip()) if v]
+        rect_raw = [rect_x0_input.text().strip(), rect_y0_input.text().strip(),
+                    rect_x1_input.text().strip(), rect_y1_input.text().strip()]
+        rect_filled = [v for v in rect_raw if v]
 
-        if rect_values:
-            if len(rect_values) != 4:
-                self.show_warning("Invalid Rect", "Pixel rect must contain exactly 4 numbers: x_start y_start x_end y_end.")
+        if rect_filled:
+            if any(not v for v in rect_raw):
+                self.show_warning("Invalid Rect", "Fill all four pixel rect fields: Start X, Start Y, End X, End Y.")
                 return
             try:
-                px_x0, px_y0, px_x1, px_y1 = [int(v) for v in rect_values]
+                px_x0, px_y0, px_x1, px_y1 = [int(v) for v in rect_raw]
             except ValueError:
                 self.show_warning("Invalid Rect", "Pixel rect values must be integer numbers.")
                 return
             texture_width, texture_height = self.texture_size
             if texture_width <= 0 or texture_height <= 0 or px_x1 <= px_x0 or px_y1 <= px_y0:
-                self.show_warning("Invalid Rect", "Pixel rect must fit a positive x_start y_start x_end y_end rectangle.")
+                self.show_warning("Invalid Rect", "Pixel rect must be a valid rectangle: End X > Start X and End Y > Start Y.")
                 return
             x0 = px_x0 / texture_width
             y0 = px_y0 / texture_height
@@ -159,12 +187,15 @@ class EditingMixin:
             glyph_width = px_x1 - px_x0
             struct.pack_into("<hHH", new_record, 18, 0, glyph_width, glyph_width)
 
-        if metrics_values:
-            if len(metrics_values) != 3:
-                self.show_warning("Invalid Metrics", "Metrics must contain exactly 3 numbers: padding_left glyph_width cell_width.")
+        metrics_raw = [metrics_pad_input.text().strip(), metrics_gw_input.text().strip(), metrics_cw_input.text().strip()]
+        metrics_filled = [v for v in metrics_raw if v]
+
+        if metrics_filled:
+            if any(not v for v in metrics_raw):
+                self.show_warning("Invalid Metrics", "Fill all three metric fields: Pad Left, Glyph Width, Cell Width.")
                 return
             try:
-                padding_left, glyph_width, cell_width = [int(v) for v in metrics_values]
+                padding_left, glyph_width, cell_width = [int(v) for v in metrics_raw]
             except ValueError:
                 self.show_warning("Invalid Metrics", "Metric values must be integer numbers.")
                 return
@@ -178,7 +209,7 @@ class EditingMixin:
             if cp >= len(new_charmap):
                 new_charmap.extend([0] * (cp + 1 - len(new_charmap)))
         if len(new_charmap) > 0x10000:
-            self.show_warning("Invalid Symbol", "ABC header cannot store a charmap larger than 65535 entries.")
+            self.show_error("Invalid Symbol", "ABC header cannot store a charmap larger than 65535 entries.")
             return
 
         new_index = old_record_count
@@ -219,29 +250,31 @@ class EditingMixin:
 
     def edit_global_params(self):
         if not self.original_data:
-            self.show_warning("No Data", "Load a .abc file first.")
+            self.show_error("No Data", "Load a .abc file first.")
             return
 
         dlg = self.create_dialog()
         dlg.setWindowTitle("Global Parameters")
         dlg.setStyleSheet("background-color: #202020; color: white;")
         dlg.setFixedWidth(340)
+        dlg.setFixedHeight(158)
         layout = QVBoxLayout(dlg)
 
-        LABEL_W = 63  # adjust to move input fields left/right
+        LABEL_W = 72  # adjust to move input fields left/right
 
         fields = [
-            ("Glyph Height",  "glyph_height",      4,  8),
-            ("Unknown H1",    "unknown_data_h1",    8,  12),
-            ("Unknown H2",    "unknown_data_h2",    12, 16),
-            ("Line height",   "line_height",    16, 20),
+            ("Glyph Height",  "glyph_height",      4,  8,  0),
+            ("Unknown H1",    "unknown_data_h1",    8,  12,  1),
+            ("Unknown H2",    "unknown_data_h2",    12, 16,  1),
+            ("Line height",   "line_height",    16, 20,  11),
         ]
 
         inputs = {}
-        for label, attr, start, end in fields:
+        for label, attr, start, end, indent in fields:
             row = QHBoxLayout()
             lbl = QLabel(f"{label}:")
             lbl.setFixedWidth(LABEL_W)
+            lbl.setIndent(indent)
             row.addWidget(lbl)
             val = getattr(self, attr, struct.unpack("<f", self.original_data[start:end])[0])
             inp = QLineEdit(f"{val:.6g}")
@@ -279,62 +312,92 @@ class EditingMixin:
         dlg = self.create_dialog()
         dlg.setWindowTitle(f"Edit Glyph {glyph['index']}")
         dlg.setStyleSheet("background-color: #202020; color: white;")
-        dlg.setFixedWidth(460)
-        dlg.resize(460, 260)
+        dlg.setFixedWidth(470)
+        dlg.setFixedHeight(574)
         layout = QVBoxLayout(dlg)
 
-        LABEL_W = 76  # adjust this to move input fields left/right
+        LABEL_W = 72  # adjust this to move input fields left/right
+        UV_LABEL_W = 41
 
-        px_row = QHBoxLayout()
-        px_lbl = QLabel("Pixel rect:")
-        px_lbl.setFixedWidth(LABEL_W)
-        px_row.addWidget(px_lbl)
-        px_input = QLineEdit(
-            f"{glyph['px_x_start']} {glyph['px_y_start']} {glyph['px_x_end']} {glyph['px_y_end']}"
-        )
-        px_input.setStyleSheet("background-color: #333; color: white;")
-        px_row.addWidget(px_input)
-        layout.addLayout(px_row)
-        px_hint = QLabel("Start X    Start Y    End X    End Y    ·    space-separated")
-        px_hint.setStyleSheet("color: #666; font-size: 10px; margin-left: 83px;")
-        layout.addWidget(px_hint)
+        sep = QLabel("── Edit glyph coordinates ──")
+        sep.setStyleSheet("color: #666; font-size: 10px;")
+        layout.addWidget(sep)
 
-        uv_row = QHBoxLayout()
-        uv_lbl = QLabel("UV rect:")
-        uv_lbl.setFixedWidth(LABEL_W)
-        uv_row.addWidget(uv_lbl)
-        uv_input = QLineEdit(
-            f"{glyph['uv_x_start']:.9f} {glyph['uv_y_start']:.9f} {glyph['uv_x_end']:.9f} {glyph['uv_y_end']:.9f}"
-        )
-        uv_input.setStyleSheet("background-color: #333; color: white;")
-        uv_row.addWidget(uv_input)
-        layout.addLayout(uv_row)
-        uv_hint = QLabel("Start U (X)    Start V (Y)    End U (X)    End V (Y)    ·    space-separated")
-        uv_hint.setStyleSheet("color: #666; font-size: 10px; margin-left: 83px;")
-        layout.addWidget(uv_hint)
+        def make_px_uv_row(axis_label, px_val, axis_label_uv, uv_val, px_indent=0, uv_indent=0):
+            row = QHBoxLayout()
+            ax_lbl = QLabel(axis_label)
+            ax_lbl.setFixedWidth(LABEL_W)
+            ax_lbl.setIndent(px_indent)
+            row.addWidget(ax_lbl)
+            px_inp = QLineEdit(str(px_val))
+            px_inp.setStyleSheet("background-color: #333; color: white;")
+            row.addWidget(px_inp)
+            uv_lbl = QLabel(axis_label_uv)
+            uv_lbl.setFixedWidth(UV_LABEL_W)
+            uv_lbl.setIndent(uv_indent)
+            row.addWidget(uv_lbl)
+            uv_inp = QLineEdit(f"{uv_val:.9f}")
+            uv_inp.setStyleSheet("background-color: #333; color: white;")
+            row.addWidget(uv_inp)
+            layout.addLayout(row)
+            return px_inp, uv_inp
 
-        metrics_row = QHBoxLayout()
-        metrics_lbl = QLabel("Metrics:")
-        metrics_lbl.setFixedWidth(LABEL_W)
-        metrics_row.addWidget(metrics_lbl)
-        metrics_input = QLineEdit(
-            f"{glyph['padding_left']} {glyph['glyph_width']} {glyph['cell_width']}"
-        )
-        metrics_input.setStyleSheet("background-color: #333; color: white;")
-        metrics_row.addWidget(metrics_input)
-        layout.addLayout(metrics_row)
-        metrics_hint = QLabel("Padding Left    Glyph Width    Cell Width    ·    space-separated")
-        metrics_hint.setStyleSheet("color: #666; font-size: 10px; margin-left: 83px;")
-        layout.addWidget(metrics_hint)
+        px_x0_input, uv_x0_input = make_px_uv_row("Start X (Pixel):", glyph['px_x_start'], "Start U:", glyph['uv_x_start'], 0, 4)
+        px_y0_input, uv_y0_input = make_px_uv_row("Start Y (Pixel):", glyph['px_y_start'], "Start V:", glyph['uv_y_start'], 0, 5)
+        px_x1_input, uv_x1_input = make_px_uv_row("End X (Pixel):",   glyph['px_x_end'],   "End U:", glyph['uv_x_end'], 4, 8)
+        px_y1_input, uv_y1_input = make_px_uv_row("End Y (Pixel):",   glyph['px_y_end'],   "End V:", glyph['uv_y_end'], 4, 9)
+
+        hint = QLabel("If pixel values are changed, they take priority over UV.")
+        hint.setStyleSheet("color: #aaa;")
+        layout.addWidget(hint)
+
+        LABEL_W = 68  # adjust this to move input fields left/right
+
+        sep = QLabel("── Edit glyph metrics ──")
+        sep.setStyleSheet("color: #666; font-size: 10px;")
+        layout.addWidget(sep)
+
+        def make_metric_row(label_text, val, indent=0):
+            row = QHBoxLayout()
+            lbl = QLabel(label_text)
+            lbl.setFixedWidth(LABEL_W)
+            lbl.setIndent(indent)
+            row.addWidget(lbl)
+            inp = QLineEdit(str(val))
+            inp.setStyleSheet("background-color: #333; color: white;")
+            row.addWidget(inp)
+            layout.addLayout(row)
+            return inp
+
+        metrics_pad_input = make_metric_row("Pad Left:",    glyph['padding_left'], 23)
+        metrics_gw_input  = make_metric_row("Glyph Width:", glyph['glyph_width'], 0)
+        metrics_cw_input  = make_metric_row("Cell Width:",  glyph['cell_width'], 11)
+
+        hint = QLabel("Padding and size affect glyph layout.")
+        hint.setStyleSheet("color: #aaa;")
+        layout.addWidget(hint)
+
+        sep = QLabel("── Glyph metadata ──")
+        sep.setStyleSheet("color: #666; font-size: 10px;")
+        layout.addWidget(sep)
 
         unknown_row = QHBoxLayout()
         unknown_lbl = QLabel("Row hint:")
         unknown_lbl.setFixedWidth(LABEL_W)
+        unknown_lbl.setStyleSheet("margin-left: 16px;")
         unknown_row.addWidget(unknown_lbl)
         unknown_input = QLineEdit(str(glyph.get("row_hint", 0)))
         unknown_input.setStyleSheet("background-color: #333; color: white;")
         unknown_row.addWidget(unknown_input)
         layout.addLayout(unknown_row)
+
+        hint = QLabel("Optional field. Does not affect rendering.")
+        hint.setStyleSheet("color: #aaa;")
+        layout.addWidget(hint)
+
+        sep = QLabel("── Glyph character preview ──")
+        sep.setStyleSheet("color: #666; font-size: 10px;")
+        layout.addWidget(sep)
 
         chars = glyph.get("chars", [])
         codepoints = glyph.get("codepoints", [])
@@ -371,7 +434,8 @@ class EditingMixin:
             fd = self.create_dialog(dlg)
             fd.setWindowTitle(title)
             fd.setStyleSheet("background-color: #202020; color: white;")
-            fd.resize(480, 500)
+            fd.setFixedWidth(360)
+            fd.setFixedHeight(500)
             fl = QVBoxLayout(fd)
 
             # Summary
@@ -532,11 +596,14 @@ class EditingMixin:
             w.setStyleSheet("background-color: #333; color: white;")
             return w
 
+        LABEL_W = 85  # adjust this to move input fields left/right
+
         add_char_row = QHBoxLayout()
         add_lbl = QLabel("Add symbol:")
         add_lbl.setFixedWidth(LABEL_W)
+        add_lbl.setStyleSheet("margin-left: 16px;")
         add_char_row.addWidget(add_lbl)
-        add_char_input = make_dark_input("Char, U+XXXX or 0xXX  (adds extra mapping)")
+        add_char_input = make_dark_input("Char, U+XXXX, 0xXXXX or decimal")
         add_char_row.addWidget(add_char_input)
         layout.addLayout(add_char_row)
 
@@ -544,21 +611,20 @@ class EditingMixin:
         replace_lbl = QLabel("Replace symbol:")
         replace_lbl.setFixedWidth(LABEL_W)
         replace_char_row.addWidget(replace_lbl)
-        replace_old_input = make_dark_input("Old char / U+XXXX")
+        replace_old_input = make_dark_input("Old: char, U+XXXX or decimal")
         replace_char_row.addWidget(replace_old_input)
         replace_char_row.addWidget(QLabel("→"))
-        replace_new_input = make_dark_input("New char / U+XXXX")
+        replace_new_input = make_dark_input("New: char, U+XXXX or decimal")
         replace_char_row.addWidget(replace_new_input)
         layout.addLayout(replace_char_row)
 
-        char_hint = QLabel("Add: maps new codepoint to this glyph. Replace: remaps old → new (old is freed).")
-        char_hint.setStyleSheet("color: #555; font-size: 10px;")
+        char_hint = QLabel(
+            "Add: maps a new codepoint to this glyph.\n"
+            "Replace: remaps old → new (removes old mapping)."
+        )
+        char_hint.setStyleSheet("color: #aaa;")
         layout.addWidget(char_hint)
         # ────────────────────────────────────────────────────────────────
-
-        hint = QLabel("Edit either Pixel rect or UV rect; Pixel rect is used when changed.")
-        hint.setStyleSheet("color: #aaa;")
-        layout.addWidget(hint)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.setStyleSheet("QPushButton { background-color: #333333; color: white; } QPushButton:hover { background-color: #444444; }")
@@ -591,7 +657,7 @@ class EditingMixin:
             if add_cp >= len(new_charmap):
                 new_charmap.extend([0] * (add_cp + 1 - len(new_charmap)))
             if len(new_charmap) > 0x10000:
-                self.show_warning("Invalid Symbol", "Charmap would exceed 65535 entries.")
+                self.show_error("Invalid Symbol", "Charmap would exceed 65535 entries.")
                 return
             new_charmap[add_cp] = glyph_index
             charmap_changed = True
@@ -631,7 +697,7 @@ class EditingMixin:
             if new_cp >= len(new_charmap):
                 new_charmap.extend([0] * (new_cp + 1 - len(new_charmap)))
             if len(new_charmap) > 0x10000:
-                self.show_warning("Invalid Symbol", "Charmap would exceed 65535 entries.")
+                self.show_error("Invalid Symbol", "Charmap would exceed 65535 entries.")
                 return
             new_charmap[new_cp] = glyph_index
             charmap_changed = True
@@ -654,20 +720,24 @@ class EditingMixin:
         # ─────────────────────────────────────────────────────────────────
 
         try:
-            px_values = [v for v in re.split(r"[\s,;]+", px_input.text().strip()) if v]
-            uv_values = [v for v in re.split(r"[\s,;]+", uv_input.text().strip()) if v]
-            metric_values = [v for v in re.split(r"[\s,;]+", metrics_input.text().strip()) if v]
+            px_values = [px_x0_input.text().strip(), px_y0_input.text().strip(),
+                         px_x1_input.text().strip(), px_y1_input.text().strip()]
+            uv_values = [uv_x0_input.text().strip(), uv_y0_input.text().strip(),
+                         uv_x1_input.text().strip(), uv_y1_input.text().strip()]
+            metric_values = [metrics_pad_input.text().strip(), metrics_gw_input.text().strip(), metrics_cw_input.text().strip()]
 
             if len(metric_values) != 3:
-                raise ValueError("Metrics must contain padding_left glyph_width cell_width.")
+                raise ValueError("Internal error: metrics fields missing.")
             padding_left, glyph_width, cell_width = [int(v) for v in metric_values]
             row_hint = int(unknown_input.text().strip(), 0)
 
-            original_px = f"{glyph['px_x_start']} {glyph['px_y_start']} {glyph['px_x_end']} {glyph['px_y_end']}"
-            if px_input.text().strip() != original_px:
-                if len(px_values) != 4:
-                    raise ValueError("Pixel rect must contain x_start y_start x_end y_end.")
-                px_x0, px_y0, px_x1, px_y1 = [int(v) for v in px_values]
+            original_px = [str(glyph['px_x_start']), str(glyph['px_y_start']),
+                           str(glyph['px_x_end']),   str(glyph['px_y_end'])]
+            if px_values != original_px:
+                try:
+                    px_x0, px_y0, px_x1, px_y1 = [int(v) for v in px_values]
+                except ValueError:
+                    raise ValueError("Pixel rect values must be integer numbers.")
                 if px_x1 <= px_x0 or px_y1 <= px_y0:
                     raise ValueError("Pixel rect must be a positive rectangle.")
                 x0 = px_x0 / self.texture_size[0]
@@ -675,16 +745,17 @@ class EditingMixin:
                 x1 = px_x1 / self.texture_size[0]
                 y1 = px_y1 / self.texture_size[1]
             else:
-                if len(uv_values) != 4:
-                    raise ValueError("UV rect must contain x_start y_start x_end y_end.")
-                x0, y0, x1, y1 = [float(v) for v in uv_values]
+                try:
+                    x0, y0, x1, y1 = [float(v) for v in uv_values]
+                except ValueError:
+                    raise ValueError("UV rect values must be float numbers.")
 
             if not (0 <= row_hint <= 0xFFFF):
-                raise ValueError("Unknown must fit uint16.")
+                raise ValueError("Row hint must be in range 0–65535.")
             if not (-32768 <= padding_left <= 32767 and 0 <= glyph_width <= 0xFFFF and 0 <= cell_width <= 0xFFFF):
-                raise ValueError("Metrics are outside supported ranges.")
+                raise ValueError("Metrics out of range: Pad Left −32768–32767, Glyph/Cell Width 0–65535.")
         except ValueError as e:
-            self.show_warning("Invalid Glyph Data", str(e))
+            self.show_error("Invalid Glyph Data", str(e))
             return
 
         record_offset = self.offset_dec + glyph["index"] * 24
@@ -702,7 +773,7 @@ class EditingMixin:
 
     def delete_symbols(self):
         if not self.abc_path or not self.original_data:
-            self.show_warning("Error", "Load an .abc file first.")
+            self.show_error("Error", "Load an .abc file first.")
             return
 
         dlg = self.create_dialog()
@@ -735,7 +806,7 @@ class EditingMixin:
         index_edit.setStyleSheet("background-color: #333; color: white;")
         layout.addWidget(index_edit)
 
-        index_hint = QLabel("Indexes are the numbers drawn on the preview/exported as JSON index.")
+        index_hint = QLabel("Glyph index as shown in the preview and JSON export.")
         index_hint.setStyleSheet("color: #aaa;")
         layout.addWidget(index_hint)
 

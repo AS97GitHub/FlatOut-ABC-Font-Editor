@@ -21,7 +21,7 @@ class ParserMixin:
 
         # Determine table layout from header
         if len(self.original_data) < 22:
-            self.show_warning("Error", "ABC file too small.")
+            self.show_error("Error", "ABC file too small.")
             return
         header = self.original_data[:22]
         self.charmap_max_codepoint = int.from_bytes(header[20:22], "little")
@@ -30,7 +30,7 @@ class ParserMixin:
         self.charmap_end = self.charmap_offset + self.charmap_count * 2
         self.auto_offset = self.charmap_end
         if self.charmap_end + 2 > len(self.original_data):
-            self.show_warning("Error", "ABC character map exceeds file size.")
+            self.show_error("Error", "ABC character map exceeds file size.")
             return
         self.charmap = list(struct.unpack_from(f"<{self.charmap_count}H", self.original_data, self.charmap_offset))
         self.glyph_record_count = struct.unpack_from("<H", self.original_data, self.charmap_end)[0]
@@ -61,7 +61,7 @@ class ParserMixin:
         data = self.original_data
         auto_offset = getattr(self, 'auto_offset', None)
         if auto_offset is None or auto_offset + 24 > len(data):
-            self.show_warning("Invalid Offset", "Offset exceeds file size.")
+            self.show_error("Invalid Offset", "Offset exceeds file size.")
             return
 
         record_count = getattr(self, "glyph_record_count", None)

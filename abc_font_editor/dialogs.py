@@ -69,7 +69,8 @@ class DialogsMixin:
         dlg = self.create_dialog()
         dlg.setWindowTitle("Charmap")
         dlg.setStyleSheet("background-color: #202020; color: white;")
-        dlg.resize(520, 560)
+        dlg.setFixedWidth(360)
+        dlg.setFixedHeight(500)
         layout = QVBoxLayout(dlg)
 
         mapped_count = sum(1 for v in self.charmap if v)
@@ -82,7 +83,7 @@ class DialogsMixin:
 
         filter_row = QHBoxLayout()
         filter_input = QLineEdit()
-        filter_input.setPlaceholderText("Filter: char, U+0041, 65, glyph 12…")
+        filter_input.setPlaceholderText("Filter: char, U+0041, decimal or glyph index number…")
         filter_input.setStyleSheet("background-color: #333; color: white;")
         filter_row.addWidget(filter_input, stretch=1)
         mapped_only_cb = QCheckBox("Mapped only")

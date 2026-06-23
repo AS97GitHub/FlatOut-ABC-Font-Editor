@@ -110,7 +110,7 @@ class ABCFontEditor(
 
         self.fit_view_btn = QPushButton("Fit")
         self.fit_view_btn.setFixedWidth(40)
-        self.fit_view_btn.setToolTip("Fit entire texture in the view (all glyphs are on the atlas)")
+        self.fit_view_btn.setToolTip("Fit entire texture in the view")
         self.fit_view_btn.clicked.connect(self.fit_texture_view)
         top_row.addWidget(self.fit_view_btn)
         

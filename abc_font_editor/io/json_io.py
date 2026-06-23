@@ -13,7 +13,7 @@ class JsonMixin:
 
     def export_json(self):
         if not self.glyphs:
-            self.show_warning("No Data", "Load a .abc file first.")
+            self.show_error("No Data", "Load a .abc file first.")
             return
     
         class ExportDialog(QDialog):
@@ -166,7 +166,7 @@ class JsonMixin:
 
     def import_json(self):
         if not self.abc_path or not self.original_data:
-            self.show_warning("Error", "Load an .abc file first.")
+            self.show_error("Error", "Load an .abc file first.")
             return
 
         json_path, _ = QFileDialog.getOpenFileName(self, "Import JSON", "", "JSON Files (*.json *.JSON)")

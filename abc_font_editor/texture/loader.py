@@ -53,7 +53,7 @@ class TextureMixin:
             width = int(self.texture_width_input.text())
             height = int(self.texture_height_input.text())
             if width <= 0 or height <= 0:
-                self.show_warning("Error", "Texture resolution must be positive numbers.")
+                self.show_error("Error", "Texture resolution must be positive numbers.")
                 return
             self.texture_size = (width, height)
             
@@ -68,4 +68,4 @@ class TextureMixin:
             self.refresh_view()
             self.show_info("Success", f"Texture resolution updated to {width}x{height}")
         except ValueError:
-            self.show_warning("Error", "Invalid texture resolution values.")
+            self.show_error("Error", "Invalid texture resolution values.")
